@@ -18,9 +18,9 @@ The project consists of two executable programs, `client` and `server`, implemen
 
 * **Signal-Based Communication**: Data is transmitted exclusively using `SIGUSR1` and `SIGUSR2` signals.
 * **PID Identification**: Upon launch, the server displays its Process ID (PID) to allow the client to target it.
-* **String Transmission**: The client converts a given string into binary and sends it bit by bit to the server.
-* **Bonus - Acknowledgement**: The server sends a signal back to the client to acknowledge the receipt of every message, ensuring synchronized transmission.
-* **Bonus - Unicode Support**: Full support for UTF-8 characters, allowing the transmission of complex symbols and emojis.
+* **String Transmission**: The client takes the server PID and a string as parameters to send the data.
+* **Bonus - Acknowledgement**: The server acknowledges each received bit by sending a signal back to the client, ensuring perfect synchronization.
+* **Bonus - Unicode Support**: Full support for UTF-8 and Unicode characters, allowing the transmission of complex symbols and emojis.
 
 ---
 
@@ -33,41 +33,41 @@ The implementation of Minitalk follows specific logic to ensure speed and reliab
 
 <br />
 
-### 🧠 Bit-Shifting Protocol
-* **Bitwise Operations**: Each character (8 bits) is processed using bitwise operators (`>>` and `&`). The client sends one signal for a '0' and another for a '1'.
-* **Static Reconstruction**: The server uses a static variable to reconstruct characters bit by bit. Once 8 bits are received, the character is printed immediately to ensure high performance.
-* **Zero-Delay Printing**: To meet the subject's speed requirements, the server avoids buffering strings and prints characters as soon as they are fully reconstructed.
+### 🧠 Global Data Management
+* **Justified Global Variable**: As authorized by the subject, one global variable is used per program to handle signal contexts.
+* **Centralized Structure**: Instead of using static variables, a global structure is used on the server side to store and reconstruct the character bits, ensuring data persistence between signal interruptions.
+* **State Preservation**: This architecture allows the server to keep track of the current bit index and the byte being formed without losing information during asynchronous signal reception.
 
 ---
 
 <br />
 
 ### 📡 Signal Handling & Synchronization
-* **sigaction Implementation**: We opted for `sigaction` over `signal` to access advanced features like `sa_sigaction`, which provides the PID of the signal sender (essential for the bonus acknowledgement).
-* **Binary Acknowledgement**: For the bonus, the client pauses and waits for a confirmation signal from the server before sending the next bit. This prevents signal loss on Linux systems where signals are not queued.
-* **Pause & Sleep**: The server uses `pause()` to wait for signals efficiently, minimizing CPU usage while inactive.
+* **sigaction Implementation**: We opted for `sigaction` over `signal` to access the `sa_sigaction` flags, which are necessary to retrieve the sender's PID for the bonus acknowledgement.
+* **Binary Acknowledgement**: To prevent signal loss (as Linux does not queue identical pending signals), the client waits for a confirmation signal from the server before sending the next bit.
+* **Efficient Waiting**: The server utilizes `pause()` to remain in a low-power state until a signal is received, optimizing CPU usage.
 
 ---
 
 <br />
 
 ### 🏗️ Robustness and Error Handling
-* **Error Management**: The programs handle invalid PIDs, incorrect numbers of arguments, and transmission failures without crashing.
-* **Memory Integrity**: The project is written in C and follows the Norm. All heap-allocated memory is properly managed to ensure a total absence of memory leaks.
+* **Error Management**: The programs are designed to handle invalid PIDs and incorrect arguments thoroughly to prevent unexpected exits.
+* **Memory Integrity**: The project is written in C and follows the Norm, ensuring that all allocated memory is properly managed and no leaks occur.
 
 ---
 
 <br />
 
 ### 📜 Authorized Functions
-This project uses a specific set of system calls for process and signal management: `write`, `ft_printf`, `signal`, `sigaction`, `kill`, `getpid`, `pause`, and `usleep`.
+This project is built using a restricted set of system calls: `write`, `ft_printf`, `signal`, `sigaction`, `kill`, `getpid`, `malloc`, `free`, `pause`, `sleep`, `usleep`, and `exit`.
 
 ---
 
 <br />
 
 ## 💻 How to Compile and Run
-The project includes a Makefile with a `bonus` rule to enable acknowledgement and Unicode support:
+The project includes a Makefile with all mandatory rules and a `bonus` rule:
 
 ---
 
@@ -77,7 +77,7 @@ The project includes a Makefile with a `bonus` rule to enable acknowledgement an
 # Clone the repository
 git clone [https://github.com/cycolonn/minitalk.git](https://github.com/cycolonn/minitalk.git)
 
-# Compile the mandatory and bonus parts
+# Compile the project with bonuses
 cd minitalk
 make bonus
 
